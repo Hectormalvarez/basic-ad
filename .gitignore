@@ -1,0 +1,16 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (Contains Secrets!)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+*.log
+
+# Exclude sensitive variables
+*.tfvars
+
+# PowerShell transcripts
+*.txt
