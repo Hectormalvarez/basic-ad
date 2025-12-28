@@ -25,3 +25,26 @@ variable "az" {
   type        = string
   default     = "us-east-1a"
 }
+
+variable "admin_password" {
+  description = "Administrator password for the Domain Controller (Sensitive)"
+  type        = string
+  sensitive   = true
+}
+
+variable "my_ip" {
+  description = "Your public IP address in CIDR format (e.g., 1.2.3.4/32) for RDP/WinRM access"
+  type        = string
+}
+
+variable "domain_name" {
+  description = "The FQDN of the Active Directory Domain"
+  type        = string
+  default     = "corp.cloudlab.internal"
+}
+
+variable "dc_ip" {
+  description = "Static Private IP for the Domain Controller"
+  type        = string
+  default     = "10.10.1.10"
+}
