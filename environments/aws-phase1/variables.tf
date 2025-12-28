@@ -48,3 +48,9 @@ variable "dc_ip" {
   type        = string
   default     = "10.10.1.10"
 }
+
+variable "client_ip" {
+  description = "Static Private IP for the Member Server (Client)"
+  type        = string
+  default     = "10.10.2.20"
+}

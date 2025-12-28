@@ -78,3 +78,60 @@ output "dc_private_ip" {
   description = "Private IP (Used by Clients for DNS)"
   value       = aws_instance.domain_controller.private_ip
 }
+
+# -----------------------------------------------------------------------------
+# Compute Resource: The Member Server (Client)
+# -----------------------------------------------------------------------------
+
+resource "aws_instance" "member_server" {
+  ami           = data.aws_ami.windows_core.id
+  instance_type = "t3.micro" 
+  
+  # Networking
+  subnet_id                   = aws_subnet.client_subnet.id # distinct subnet
+  private_ip                  = var.client_ip
+  vpc_security_group_ids      = [aws_security_group.dc_sg.id] # Reusing SG for lab simplicity
+  associate_public_ip_address = true 
+  
+  # Storage
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+    encrypted   = true
+  }
+
+  # ---------------------------------------------------------------------------
+  # The Client Bootstrap Strategy
+  # ---------------------------------------------------------------------------
+  user_data = <<POWERSHELL
+<powershell>
+# 1. Save the script logic
+$ScriptContent = @"
+${file("../../modules/identity-core/scripts/bootstrap-client.ps1")}
+"@
+Set-Content -Path C:\bootstrap-client.ps1 -Value $ScriptContent
+
+# 2. Execute the Wait Loop
+# We pass the DC's IP so this client knows who to ask for DNS
+C:\bootstrap-client.ps1 -DomainName "${var.domain_name}" -AdminPassword "${var.admin_password}" -DcIP "${var.dc_ip}"
+</powershell>
+POWERSHELL
+
+  # Explicit Dependency: Ensure DC exists before Client starts
+  depends_on = [aws_instance.domain_controller]
+
+  tags = {
+    Name = "Client01-Member"
+    Role = "Member Server"
+  }
+}
+
+output "client_public_ip" {
+  description = "Public IP for Client RDP Access"
+  value       = aws_instance.member_server.public_ip
+}
+
+output "client_private_ip" {
+  description = "Private IP for Client"
+  value       = aws_instance.member_server.private_ip
+}
