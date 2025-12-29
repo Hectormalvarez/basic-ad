@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "Base name for resources, used in tagging"
   type        = string
-  default     = "omni-identity-lab"
+  default     = "basic-ad"
 }
 
 variable "vpc_cidr" {

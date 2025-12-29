@@ -1,4 +1,4 @@
-# Omni-Identity Lab: Automated Active Directory on AWS
+# Basic AD: Automated Active Directory on AWS
 
 This project automates the deployment of a fully functional Windows Active Directory (AD) environment on AWS using Terraform and PowerShell. It provisions a custom VPC, a Domain Controller (DC), and a Member Server (Client) with zero manual intervention.
 
@@ -25,8 +25,8 @@ The environment creates an isolated network topology:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/omni-identity-lab.git
-cd omni-identity-lab/environments/aws-phase1
+git clone https://github.com/Hectormalvarez/basic-ad.git
+cd basic-ad/environments/aws-phase1
 
 ```
 

@@ -15,7 +15,7 @@ provider "aws" {
   # Default tags apply metadata to all resources for cost tracking and project identification
   default_tags {
     tags = {
-      Project     = "Omni-Identity-Lab"
+      Project     = "basic-ad"
       Environment = "Development"
       ManagedBy   = "Terraform"
     }
