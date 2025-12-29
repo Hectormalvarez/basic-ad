@@ -15,6 +15,30 @@ resource "aws_vpc" "lab_vpc" {
 }
 
 # -----------------------------------------------------------------------------
+# DHCP Options (The DNS Fix for Active Directory)
+# -----------------------------------------------------------------------------
+
+resource "aws_vpc_dhcp_options" "ad_lab_dhcp" {
+  domain_name = var.domain_name
+
+  # CRITICAL: 
+  # 1. First DNS Server = Your Domain Controller (var.dc_ip)
+  # 2. Second DNS Server = Amazon (Backup/Internet resolution)
+  domain_name_servers = [var.dc_ip, "AmazonProvidedDNS"]
+
+  ntp_servers = ["169.254.169.123"] # Sync time with AWS infrastructure
+
+  tags = {
+    Name = "omni-ad-dhcp"
+  }
+}
+
+resource "aws_vpc_dhcp_options_association" "ad_lab_assoc" {
+  vpc_id          = aws_vpc.lab_vpc.id
+  dhcp_options_id = aws_vpc_dhcp_options.ad_lab_dhcp.id
+}
+
+# -----------------------------------------------------------------------------
 # Connectivity (Internet Gateway & Routing)
 # -----------------------------------------------------------------------------
 

@@ -1,0 +1,22 @@
+<powershell>
+# -----------------------------------------------------------------------------
+# 1. LOCAL SETUP
+# -----------------------------------------------------------------------------
+# Optional: We still reset the built-in admin for your local RDP convenience.
+net user Administrator "${admin_password}" /active:yes
+
+# -----------------------------------------------------------------------------
+# 2. SCRIPT INJECTION
+# -----------------------------------------------------------------------------
+$ScriptContent = @'
+${script_content}
+'@
+
+Set-Content -Path C:\bootstrap-client.ps1 -Value $ScriptContent
+
+# -----------------------------------------------------------------------------
+# 3. EXECUTION
+# -----------------------------------------------------------------------------
+# CRITICAL: We pass "CloudAdmin" as the user authorized to join the domain.
+C:\bootstrap-client.ps1 -DomainName "${domain_name}" -AdminUser "CloudAdmin" -AdminPassword '${admin_password}' -DcIP "${dc_ip}"
+</powershell>

@@ -26,6 +26,12 @@ variable "az" {
   default     = "us-east-1a"
 }
 
+variable "instance_type" {
+  description = "EC2 instance size for Lab Servers"
+  type        = string
+  default     = "t3.small"
+}
+
 variable "admin_password" {
   description = "Administrator password for the Domain Controller (Sensitive)"
   type        = string

@@ -1,0 +1,28 @@
+<powershell>
+# -----------------------------------------------------------------------------
+# 1. CREATE DEDICATED ADMIN ("CloudAdmin")
+# -----------------------------------------------------------------------------
+# We create this user to avoid fighting AWS EC2Launch over the built-in 
+# 'Administrator' account password.
+net user CloudAdmin "${admin_password}" /add /y
+net localgroup Administrators CloudAdmin /add
+
+# Set Password to specific settings to avoid "Password Complexity" or "Expiration" errors
+wmic useraccount where "Name='CloudAdmin'" set PasswordExpires=FALSE
+
+# -----------------------------------------------------------------------------
+# 2. SCRIPT INJECTION
+# -----------------------------------------------------------------------------
+$ScriptContent = @'
+${script_content}
+'@
+
+Set-Content -Path C:\bootstrap-dc.ps1 -Value $ScriptContent
+
+# -----------------------------------------------------------------------------
+# 3. EXECUTION
+# -----------------------------------------------------------------------------
+# The script runs as SYSTEM, so it handles the promotion. 
+# We pass the SafeModePassword for the DSRM account.
+C:\bootstrap-dc.ps1 -DomainName "${domain_name}" -SafeModePassword '${admin_password}' -StaticIP "${dc_ip}"
+</powershell>
