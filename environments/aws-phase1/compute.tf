@@ -39,6 +39,9 @@ resource "aws_instance" "domain_controller" {
     encrypted   = true
   }
 
+  # Identity & Access Management (SSM Enabled)
+  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
+
   # ---------------------------------------------------------------------------
   # The Bootstrap Injection Strategy
   # ---------------------------------------------------------------------------
@@ -75,6 +78,9 @@ resource "aws_instance" "member_server" {
     volume_type = "gp3"
     encrypted   = true
   }
+
+  # Identity & Access Management (SSM Enabled)
+  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
 
   # ---------------------------------------------------------------------------
   # The Client Bootstrap Strategy
