@@ -23,7 +23,7 @@ resource "aws_security_group" "dc_sg" {
     protocol    = "tcp"
     cidr_blocks = [var.my_ip]
   }
-  
+
   # Allow HTTP WinRM for initial lab bootstrap (Optional but helpful for debugging)
   ingress {
     description = "Allow WinRM (HTTP) from Admin IP"

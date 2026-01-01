@@ -5,8 +5,8 @@
 resource "aws_vpc" "lab_vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
-  enable_dns_hostnames = true 
-   
+  enable_dns_hostnames = true
+
   tags = {
     Name = "${var.project_name}-vpc"
   }
@@ -24,7 +24,7 @@ resource "aws_vpc_dhcp_options" "ad_lab_dhcp" {
   # 2. Second DNS Server = Amazon (Backup/Internet resolution)
   domain_name_servers = [var.dc_ip, "AmazonProvidedDNS"]
 
-  ntp_servers = ["169.254.169.123"] 
+  ntp_servers = ["169.254.169.123"]
 
   tags = {
     Name = "${var.project_name}-dhcp"

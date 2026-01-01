@@ -25,16 +25,16 @@ data "aws_ami" "windows_core" {
 resource "aws_instance" "domain_controller" {
   ami           = data.aws_ami.windows_core.id
   instance_type = var.instance_type
-   
+
   # Networking
   subnet_id                   = aws_subnet.identity_subnet.id
   private_ip                  = var.dc_ip
   vpc_security_group_ids      = [aws_security_group.dc_sg.id]
-  associate_public_ip_address = true 
-   
+  associate_public_ip_address = true
+
   # Storage (Root Volume)
   root_block_device {
-    volume_size = 35 
+    volume_size = 35
     volume_type = "gp3"
     encrypted   = true
   }
@@ -62,13 +62,13 @@ resource "aws_instance" "domain_controller" {
 resource "aws_instance" "member_server" {
   ami           = data.aws_ami.windows_core.id
   instance_type = var.instance_type
-   
+
   # Networking
-  subnet_id                   = aws_subnet.client_subnet.id 
+  subnet_id                   = aws_subnet.client_subnet.id
   private_ip                  = var.client_ip
   vpc_security_group_ids      = [aws_security_group.dc_sg.id]
-  associate_public_ip_address = true 
-   
+  associate_public_ip_address = true
+
   # Storage
   root_block_device {
     volume_size = 30
