@@ -29,7 +29,7 @@ resource "aws_instance" "domain_controller" {
   # Networking
   subnet_id                   = aws_subnet.identity_subnet.id
   private_ip                  = var.dc_ip
-  vpc_security_group_ids      = [aws_security_group.dc_sg.id]
+  vpc_security_group_ids      = [aws_security_group.base_sg.id]
   associate_public_ip_address = true
 
   # Storage (Root Volume)
@@ -38,6 +38,9 @@ resource "aws_instance" "domain_controller" {
     volume_type = "gp3"
     encrypted   = true
   }
+
+  # Identity & Access Management (SSM Enabled)
+  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
 
   # ---------------------------------------------------------------------------
   # The Bootstrap Injection Strategy
@@ -66,7 +69,7 @@ resource "aws_instance" "member_server" {
   # Networking
   subnet_id                   = aws_subnet.client_subnet.id
   private_ip                  = var.client_ip
-  vpc_security_group_ids      = [aws_security_group.dc_sg.id]
+  vpc_security_group_ids      = [aws_security_group.base_sg.id]
   associate_public_ip_address = true
 
   # Storage
@@ -75,6 +78,9 @@ resource "aws_instance" "member_server" {
     volume_type = "gp3"
     encrypted   = true
   }
+
+  # Identity & Access Management (SSM Enabled)
+  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
 
   # ---------------------------------------------------------------------------
   # The Client Bootstrap Strategy
@@ -99,19 +105,19 @@ resource "aws_instance" "member_server" {
 # Outputs
 # -----------------------------------------------------------------------------
 
-output "dc_public_ip" {
-  description = "Public IP for RDP Access (Use with caution)"
-  value       = aws_instance.domain_controller.public_ip
+output "ssm_dc_command" {
+  description = "Run this command to open a PowerShell session to the DC"
+  value       = "aws ssm start-session --target ${aws_instance.domain_controller.id}"
+}
+
+output "ssm_client_command" {
+  description = "Run this command to open a PowerShell session to the Client"
+  value       = "aws ssm start-session --target ${aws_instance.member_server.id}"
 }
 
 output "dc_private_ip" {
   description = "Private IP (Used by Clients for DNS)"
   value       = aws_instance.domain_controller.private_ip
-}
-
-output "client_public_ip" {
-  description = "Public IP for Client RDP Access"
-  value       = aws_instance.member_server.public_ip
 }
 
 output "client_private_ip" {

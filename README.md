@@ -2,7 +2,7 @@
 
 This project automates the deployment of a fully functional Windows Active Directory (AD) environment on AWS using Terraform and PowerShell. It provisions a custom VPC, a Domain Controller (DC), and a Member Server (Client) with zero manual intervention.
 
-The lab is designed to demonstrate **Infrastructure as Code (IaC)** principles, specifically solving the "bootstrapping race condition" in Windows AD promotions using a dedicated `CloudAdmin` identity strategy.
+The lab is designed to demonstrate **Infrastructure as Code (IaC)** principles and **Zero Trust** security by using AWS Systems Manager (SSM) instead of open RDP ports.
 
 ## 🏗 Architecture
 
@@ -12,40 +12,37 @@ The environment creates an isolated network topology:
 * **Domain Controller (DC01):** `10.10.1.10` (Windows Server 2022 Core)
 * **Member Server (Client01):** `10.10.2.20` (Windows Server 2022 Core)
 * **Domain:** `corp.cloudlab.internal`
-* **Security:** Strict Security Groups locked to your specific public IP.
+* **Security:** "Dark Node" configuration (No inbound internet access).
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-* **Terraform** (v1.0+)
-* **AWS CLI** (configured with credentials)
-* **Git**
+1.  **Terraform** (v1.0+)
+2.  **AWS CLI** (Configured with `aws configure`)
+3.  **Session Manager Plugin** ([Install Guide](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html))
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Hectormalvarez/basic-ad.git
+git clone [https://github.com/Hectormalvarez/basic-ad.git](https://github.com/Hectormalvarez/basic-ad.git)
 cd basic-ad/environments/aws-phase1
 
 ```
 
 ### 2. Configure Variables
 
-Create a `terraform.tfvars` file in the `aws-phase1` directory to set your secrets.
+Create a `terraform.tfvars` file in the `aws-phase1` directory.
 
-**⚠️ Password Warning:** Windows Server enforces strict complexity requirements. Your password must contain Uppercase, Lowercase, and Numbers (e.g., `CloudL@b2025!`). If the password is too simple, the bootstrap scripts will fail silently.
+**⚠️ Password Warning:** Windows Server enforces strict complexity (Uppercase, Lowercase, Numbers).
 
 ```hcl
 # terraform.tfvars
 
-# Your Public IP for RDP access (visit ifconfig.me to find it)
-my_ip = "123.45.67.89/32"
-
 # The master password for the lab (Must be Complex!)
-admin_password = "YourComplexPassword123!"
+admin_password = "CloudL@b2026!"
 
-# Optional: Change the instance size (Default: t3.small)
+# Optional: Change the instance size
 instance_type = "t3.medium"
 
 ```
@@ -62,64 +59,51 @@ terraform apply
 
 The deployment takes approximately **15-20 minutes**.
 
-* **Phase 1 (2 min):** Infrastructure provisioning (VPC, EC2s).
-* **Phase 2 (10-15 min):** Windows bootstrapping. The Client will enter a wait loop until the DC finishes promoting and reboots.
+* **Phase 1 (2 min):** Infrastructure provisioning.
+* **Phase 2 (10-15 min):** Windows bootstrapping (DC Promotion & Reboot).
 
 ### 4. Access the Lab
 
-Once Terraform completes, it will output the Public IPs:
+This lab uses **AWS Systems Manager** for secure access. You do not need RDP or a Public IP.
 
-```text
-Outputs:
+Run the commands output by Terraform to verify connectivity:
 
-client_public_ip = "54.123.45.67"
-dc_public_ip     = "3.98.76.54"
+**Connect to Domain Controller:**
+
+```bash
+# Copy the command from Terraform output 'ssm_dc_command'
+aws ssm start-session --target i-0123456789abcdef0
 
 ```
 
-Connect via RDP using the **CloudAdmin** credentials (this user is created to bypass AWS password randomization):
+**Connect to Client:**
 
-* **Username:** `CloudAdmin` (or `CORP\CloudAdmin`)
-* **Password:** *(The value you set in `admin_password`)*
+```bash
+# Copy the command from Terraform output 'ssm_client_command'
+aws ssm start-session --target i-09876543210abcdef
+
+```
+
+Once inside the PowerShell session:
+
+* **Check Domain Status:** `Get-ADDomain`
+* **Check DNS:** `Get-DnsServerResourceRecord -ZoneName "corp.cloudlab.internal"`
 
 ---
 
 ## 🔧 Technical Details
 
-### The "CloudAdmin" Strategy
+### Zero Trust Access
 
-A common issue in automating Active Directory on AWS is that the EC2Launch agent randomizes the built-in `Administrator` password upon the post-promotion reboot. This breaks downstream automation (like client domain joins) that relies on the initial password.
+We utilize **AWS Systems Manager (SSM)** to manage the instances.
 
-**Solution:**
-
-1. **UserData Injection:** We create a dedicated user `CloudAdmin` during the initial boot.
-2. **Persistence:** Since the AWS agent only manages the built-in `Administrator` account, `CloudAdmin` retains its password through the promotion reboot.
-3. **Elevation:** When the server becomes a Domain Controller, all local Administrators (including `CloudAdmin`) automatically become **Domain Admins**.
-4. **Convergence:** The Client script is configured to authenticate against the domain using `CloudAdmin@corp.cloudlab.internal`.
-
-### Directory Structure
-
-```text
-.
-├── environments/
-│   └── aws-phase1/          # Main Terraform configuration
-│       ├── compute.tf       # EC2 instances & UserData templating
-│       ├── network.tf       # VPC, Subnets, DHCP Options
-│       ├── security.tf      # Security Groups
-│       └── templates/       # PowerShell injection templates
-└── modules/
-    └── identity-core/
-        └── scripts/         # Reusable PowerShell logic
-            ├── bootstrap-dc.ps1      # Rename, IP, & Promote logic
-            └── bootstrap-client.ps1  # DNS set, Wait Loop, & Join logic
-
-```
+* **No Open Ports:** Security Groups allow NO inbound traffic from the internet.
+* **IAM Auth:** Access is controlled via AWS Identity and Access Management (IAM), not network firewalls.
+* **DNS Handling:** Custom bootstrapping scripts inject DNS Forwarders to ensure the DC can communicate with AWS APIs even after promoting to a Domain Controller.
 
 ## 🧹 Clean Up
 
-To destroy all resources and stop incurring costs:
+To destroy all resources:
 
 ```bash
 terraform destroy
-
-```
