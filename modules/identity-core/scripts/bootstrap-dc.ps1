@@ -74,7 +74,16 @@ try {
             -SafeModeAdministratorPassword $SecurePassword `
             -InstallDns:$true `
             -Force:$true `
-            -Confirm:$false
+            -Confirm:$false `
+            -NoRebootOnCompletion:$true
+
+        # Configure DNS Forwarder to VPC Resolver (VPC Base + 2)
+        # This ensures the SSM Agent can resolve AWS endpoints.
+        Write-Output "Configuring DNS Forwarders..."
+        Add-DnsServerForwarder -IPAddress "10.10.0.2" -PassThru
+
+        Write-Output "Rebooting to finalize promotion..."
+        Restart-Computer -Force
     } else {
         Write-Output "Server is already a member of $DomainName."
     }
