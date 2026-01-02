@@ -53,39 +53,17 @@ git clone https://github.com/Hectormalvarez/basic-ad.git
 cd basic-ad
 ```
 
-### 2. Phase 0: Identity Bootstrap (Run Once)
 
-*Security Best Practice:* Instead of running as Root/Admin, we first create a restricted "Lab Operator" persona.
+### 2. Phase 0: Identity Bootstrap
 
-#### ⚠️ Pre-requisite for Non-Root Users
+Before deploying the lab, you need a secure identity. Choose the method that fits your environment:
 
-If you are running this as a restricted user (e.g., `terraform-user`), you must temporarily grant your user the right to create IAM policies.
+| Method | Description | Link |
+| :--- | :--- | :--- |
+| **A. Local CLI** | For users who already have local AWS keys. Creates a secure IAM Group. | [View Instructions](environments/00-bootstrap-iam/README.md) |
+| **B. Cloud Runner** | **(Recommended)** Launches a secure jump box via CloudFormation. No local keys required. | [View Instructions](environments/00-bootstrap-runner/README.md) |
 
-**Steps:**
-
-1. Log into the AWS Console as Admin/Root
-2. Add a temporary **Inline Policy** to your user with this JSON:
-
-<details>
-<summary>Click to view JSON Policy</summary>
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-            "iam:CreateGroup", "iam:GetGroup", "iam:DeleteGroup", "iam:UpdateGroup",
-            "iam:CreatePolicy", "iam:GetPolicy", "iam:GetPolicyVersion",
-            "iam:DeletePolicy", "iam:CreatePolicyVersion", "iam:DeletePolicyVersion",
-            "iam:AttachGroupPolicy", "iam:DetachGroupPolicy", "iam:List*"
-        ],
-        "Resource": "*"
-    }]
-}
 ```
-
-</details>
 
 #### Deployment
 
