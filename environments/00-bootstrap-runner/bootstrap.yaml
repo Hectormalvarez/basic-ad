@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Phase 0 (Option B): Deploys a Secure Bootstrap Runner EC2 instance."
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small, t2.micro]
+    Description: Instance size for the runner.
+
+Resources:
+  # ---------------------------------------------------------------------------
+  # 1. IAM Role: The Bootstrap Runner Identity
+  # ---------------------------------------------------------------------------
+  RunnerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "Terraform-Bootstrap-Runner-Role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: "ec2.amazonaws.com" }
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        # Required for SSM Session Manager connectivity
+        - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        # Required to deploy the Lab (VPC, EC2, IAM, etc.)
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+
+  RunnerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: "Terraform-Bootstrap-Profile"
+      Roles: [ !Ref RunnerRole ]
+
+  # ---------------------------------------------------------------------------
+  # 2. The Runner Instance
+  # ---------------------------------------------------------------------------
+  RunnerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LatestAmiId 
+      IamInstanceProfile: !Ref RunnerInstanceProfile
+      Tags:
+        - Key: Name
+          Value: "Bootstrap-Runner"
+      # Auto-install tooling (Terraform, Git) on first boot
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          dnf install -y git yum-utils
+          yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+          dnf install -y terraform
+
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64'
+
+Outputs:
+  ConnectCommand:
+    Description: "Command to connect to the runner"
+    Value: !Sub "aws ssm start-session --target ${RunnerInstance}"
