@@ -29,7 +29,7 @@ You are now inside the secure runner.
 ```bash
 # 1. Get the code
 cd /home/ec2-user
-git clone [https://github.com/Hectormalvarez/basic-ad.git](https://github.com/Hectormalvarez/basic-ad.git)
+git clone https://github.com/Hectormalvarez/basic-ad.git
 cd basic-ad/environments/aws-phase1
 
 # 2. Configure Secrets
@@ -47,5 +47,3 @@ When you are done with the project:
 
 1. Run `terraform destroy` from inside the runner.
 2. Delete the `Lab-Bootstrap` stack from the CloudFormation console to terminate the runner.
-
-```
