@@ -63,26 +63,6 @@ Before deploying the lab, you need a secure identity. Choose the method that fit
 | **A. Local CLI** | For users who already have local AWS keys. Creates a secure IAM Group. | [View Instructions](environments/00-bootstrap-iam/README.md) |
 | **B. Cloud Runner** | **(Recommended)** Launches a secure jump box via CloudFormation. No local keys required. | [View Instructions](environments/00-bootstrap-runner/README.md) |
 
-```
-
-#### Deployment
-
-1. Initialize the identity module:
-
-```bash
-cd environments/00-bootstrap-iam
-terraform init && terraform apply
-```
-
-2. Add your user to the new secure group:
-
-```bash
-# Replace <YOUR_USER> with your actual AWS IAM username
-aws iam add-user-to-group --user-name <YOUR_USER> --group-name terraform-group
-```
-
-3. **Clean Up:** Delete the temporary Inline Policy you created in the pre-requisite step.
-
 ### 3. Phase 1: Deploy Infrastructure
 
 Navigate to the main lab environment:
