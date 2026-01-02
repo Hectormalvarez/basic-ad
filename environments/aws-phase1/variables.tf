@@ -38,11 +38,6 @@ variable "admin_password" {
   sensitive   = true
 }
 
-variable "my_ip" {
-  description = "Your public IP address in CIDR format (e.g., 1.2.3.4/32) for RDP/WinRM access"
-  type        = string
-}
-
 variable "domain_name" {
   description = "The FQDN of the Active Directory Domain"
   type        = string

@@ -33,9 +33,7 @@ git clone [https://github.com/Hectormalvarez/basic-ad.git](https://github.com/He
 cd basic-ad/environments/aws-phase1
 
 # 2. Configure Secrets
-# (SSM doesn't need your real IP, so we use 0.0.0.0/0)
 echo 'admin_password = "ComplexPassword123!"' > terraform.tfvars
-echo 'my_ip = "0.0.0.0/0"' >> terraform.tfvars
 
 # 3. Deploy
 terraform init
