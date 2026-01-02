@@ -26,18 +26,46 @@ The environment creates an isolated network topology:
 
 ```bash
 git clone [https://github.com/Hectormalvarez/basic-ad.git](https://github.com/Hectormalvarez/basic-ad.git)
-cd basic-ad/environments/aws-phase1
+cd basic-ad
 
 ```
 
-### 2. Configure Variables
+### 2. Phase 0: Identity Bootstrap (Run Once)
 
-Create a `terraform.tfvars` file in the `aws-phase1` directory.
+*Security Best Practice:* Instead of running as Root/Admin, we first create a restricted "Lab Operator" persona.
+
+1. Initialize the identity module:
+```bash
+cd environments/00-bootstrap-iam
+terraform init && terraform apply
+
+```
+
+
+2. Add your user to the new secure group:
+```bash
+# Replace <YOUR_USER> with your actual AWS IAM username
+aws iam add-user-to-group --user-name <YOUR_USER> --group-name terraform-group
+
+```
+
+
+
+### 3. Phase 1: Deploy Infrastructure
+
+Navigate to the main lab environment:
+
+```bash
+cd ../aws-phase1
+
+```
+
+Create a `terraform.tfvars` file to configure your secrets:
 
 **⚠️ Password Warning:** Windows Server enforces strict complexity (Uppercase, Lowercase, Numbers).
 
 ```hcl
-# terraform.tfvars
+# environments/aws-phase1/terraform.tfvars
 
 # The master password for the lab (Must be Complex!)
 admin_password = "CloudL@b2026!"
@@ -47,9 +75,7 @@ instance_type = "t3.medium"
 
 ```
 
-### 3. Deploy
-
-Initialize Terraform and apply the configuration.
+Initialize and deploy:
 
 ```bash
 terraform init
@@ -59,8 +85,8 @@ terraform apply
 
 The deployment takes approximately **15-20 minutes**.
 
-* **Phase 1 (2 min):** Infrastructure provisioning.
-* **Phase 2 (10-15 min):** Windows bootstrapping (DC Promotion & Reboot).
+* **Step 1 (2 min):** Infrastructure provisioning.
+* **Step 2 (10-15 min):** Windows bootstrapping (DC Promotion & Reboot).
 
 ### 4. Access the Lab
 
@@ -93,17 +119,19 @@ Once inside the PowerShell session:
 
 ## 🔧 Technical Details
 
-### Zero Trust Access
+### Zero Trust Access & Least Privilege
 
-We utilize **AWS Systems Manager (SSM)** to manage the instances.
-
+* **RBAC Identity:** The `00-bootstrap-iam` module creates a custom IAM Group (`terraform-group`) with restricted permissions, ensuring the lab operator cannot accidentally modify billing or root settings.
 * **No Open Ports:** Security Groups allow NO inbound traffic from the internet.
 * **IAM Auth:** Access is controlled via AWS Identity and Access Management (IAM), not network firewalls.
 * **DNS Handling:** Custom bootstrapping scripts inject DNS Forwarders to ensure the DC can communicate with AWS APIs even after promoting to a Domain Controller.
 
 ## 🧹 Clean Up
 
-To destroy all resources:
+To destroy the lab infrastructure:
 
 ```bash
+# From environments/aws-phase1/
 terraform destroy
+
+```
