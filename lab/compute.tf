@@ -46,7 +46,7 @@ resource "aws_instance" "domain_controller" {
   # The Bootstrap Injection Strategy
   # ---------------------------------------------------------------------------
   user_data = templatefile("${path.module}/templates/dc-userdata.tftpl", {
-    script_content = file("../../modules/identity-core/scripts/bootstrap-dc.ps1")
+    script_content = file("${path.module}/scripts/bootstrap-dc.ps1")
     domain_name    = var.domain_name
     admin_password = var.admin_password
     dc_ip          = var.dc_ip
@@ -86,7 +86,7 @@ resource "aws_instance" "member_server" {
   # The Client Bootstrap Strategy
   # ---------------------------------------------------------------------------
   user_data = templatefile("${path.module}/templates/client-userdata.tftpl", {
-    script_content = file("../../modules/identity-core/scripts/bootstrap-client.ps1")
+    script_content = file("${path.module}/scripts/bootstrap-client.ps1")
     domain_name    = var.domain_name
     admin_password = var.admin_password
     dc_ip          = var.dc_ip
