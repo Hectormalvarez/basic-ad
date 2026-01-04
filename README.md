@@ -58,9 +58,17 @@ You are deploying a professional Identity Lab directly from your browser.
 ```bash
 git clone https://github.com/Hectormalvarez/basic-ad.git
 cd basic-ad
+
+# Run with default settings (Free Tier / t3.micro)
 ./quickstart.sh
 
+# Optional: Run with better performance (~$0.04/hr)
+./quickstart.sh t3.small
+# small is still free tier but has 2gb of ram instead of 1gb with the micro
+
 ```
+
+**Note:** This defaults to `t3.micro` (Free Tier). To use a faster instance, run: `./quickstart.sh LARGER_INSTANCE_TYPE`
 
 1. **Enter a Password:**
 
