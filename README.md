@@ -1,8 +1,8 @@
 # ☁️ Basic AD: The Simplest Active Directory Lab
 
-> **Learn Active Directory on AWS in minutes.**
->
-> 🛑 **Read this before starting:** This lab creates real AWS resources. It will cost approximately **$0.15 per hour** while running. **Always run the Cleanup step when finished.**
+**Learn Active Directory on AWS in minutes.**
+
+🛑 **Read this before starting:** This lab creates real AWS resources. By default, it uses `t3.micro` (Free Tier eligible) but can be upgraded to `t3.small` (~$0.04/hr) for better performance. **Always run the Cleanup step when finished.**
 
 ---
 
@@ -59,16 +59,16 @@ You are deploying a professional Identity Lab directly from your browser.
 git clone https://github.com/Hectormalvarez/basic-ad.git
 cd basic-ad
 
-# Run with default settings (Free Tier / t3.micro)
+# Run with default settings (Free Tier / t3.micro (1GB RAM))
 ./quickstart.sh
 
-# Optional: Run with better performance (~$0.04/hr)
+# Recommended: Run with better performance (~$0.04/hr (2GB RAM))
 ./quickstart.sh t3.small
-# small is still free tier but has 2gb of ram instead of 1gb with the micro
 
 ```
 
-**Note:** This defaults to `t3.micro` (Free Tier). To use a faster instance, run: `./quickstart.sh LARGER_INSTANCE_TYPE`
+**Note:** running `.\quickstart.sh` without a parameter will default to `t3.micro` (Free Tier) with only 1GB of RAM.
+To use a faster instance, run: `./quickstart.sh LARGER_INSTANCE_TYPE`
 
 1. **Enter a Password:**
 
@@ -146,11 +146,10 @@ Your AWS user permissions might be too restricted. Ensure you are using an Admin
 2. Run this command:
 
 ```bash
-cd ~/basic-ad/lab
-terraform destroy -auto-approve
+./quickstart.sh destroy
 
 ```
 
-1. Wait for the confirmation: `Destroy complete!`
+1. Wait for the confirmation: `Cleanup Complete!`
 
 > **Tip:** If you close CloudShell, your lab is **NOT** deleted. You must reopen CloudShell, navigate to the folder, and run the destroy command.
