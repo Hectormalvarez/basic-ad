@@ -1,5 +1,5 @@
 #!/bin/bash
-# quickstart.sh - The "Easy Button"
+# quickstart.sh - The "Easy Button" (Now with Auto-Install)
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -7,11 +7,28 @@ NC='\033[0m'
 
 echo -e "${CYAN}=== Basic AD Lab Setup ===${NC}"
 
-# Check if we are in the right folder (the flat structure)
+# Check if we are in the right folder
 if [ ! -d "lab" ]; then
     echo "Error: 'lab' directory not found. Are you in the root of the repo?"
     exit 1
 fi
+
+# ------------------------------------------------------------------
+# 0. Auto-Install Terraform (If missing in CloudShell)
+# ------------------------------------------------------------------
+if ! command -v terraform &> /dev/null; then
+    echo -e "${CYAN}Terraform not found. Installing...${NC}"
+    
+    # Download official HashiCorp binary (Linux AMD64)
+    # Using curl/unzip ensures this works on Amazon Linux 2023 / CloudShell
+    curl -s -O https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip
+    unzip -q terraform_1.9.5_linux_amd64.zip
+    sudo mv terraform /usr/bin/
+    rm terraform_1.9.5_linux_amd64.zip
+    
+    echo -e "${GREEN}Terraform installed successfully!${NC}"
+fi
+# ------------------------------------------------------------------
 
 # 1. Ask for Password
 echo ""
