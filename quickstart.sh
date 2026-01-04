@@ -1,5 +1,5 @@
 #!/bin/bash
-# quickstart.sh - The "Easy Button" (Now with Auto-Install)
+# quickstart.sh - The "Easy Button" (Free Tier Edition)
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -18,17 +18,12 @@ fi
 # ------------------------------------------------------------------
 if ! command -v terraform &> /dev/null; then
     echo -e "${CYAN}Terraform not found. Installing...${NC}"
-    
-    # Download official HashiCorp binary (Linux AMD64)
-    # Using curl/unzip ensures this works on Amazon Linux 2023 / CloudShell
     curl -s -O https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip
     unzip -q terraform_1.9.5_linux_amd64.zip
     sudo mv terraform /usr/bin/
     rm terraform_1.9.5_linux_amd64.zip
-    
     echo -e "${GREEN}Terraform installed successfully!${NC}"
 fi
-# ------------------------------------------------------------------
 
 # 1. Ask for Password
 echo ""
@@ -38,11 +33,11 @@ echo -n "Password: "
 read -s LAB_PASSWORD
 echo ""
 
-# 2. Write Config
+# 2. Write Config (FIXED: Uses t3.micro for Free Tier)
 echo -e "\nConfiguring secrets..."
 cat <<EOF > lab/terraform.tfvars
 admin_password = "$LAB_PASSWORD"
-instance_type  = "t3.medium"
+instance_type  = "t3.micro"
 EOF
 
 # 3. Deploy
