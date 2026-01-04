@@ -7,7 +7,7 @@
 TARGET=${1:-dc}
 
 if [[ "$TARGET" == "client" ]]; then
-    SERVER_TAG="Client01-Identity"
+    SERVER_TAG="Client01-Member"
     DISPLAY_NAME="Member Server (Client01)"
 else
     SERVER_TAG="DC01-Identity"
