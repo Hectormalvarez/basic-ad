@@ -1,145 +1,148 @@
-# Basic AD: Automated Active Directory on AWS
+# ☁️ Basic AD: The Simplest Active Directory Lab
 
-[![Terraform](https://img.shields.io/badge/Terraform-v1.0+-623CE4?logo=terraform)](https://www.terraform.io/)
-[![AWS](https://img.shields.io/badge/AWS-SSM%20Enabled-FF9900?logo=amazon-aws)](https://aws.amazon.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+> **Learn Active Directory on AWS in minutes.**
+>
+> 🛑 **Read this before starting:** This lab creates real AWS resources. It will cost approximately **$0.15 per hour** while running. **Always run the Cleanup step when finished.**
 
-> **Automated Windows Active Directory lab environment on AWS with zero manual configuration**
+---
 
-This project automates the deployment of a fully functional Windows Active Directory (AD) environment on AWS using Terraform and PowerShell. It provisions a custom VPC, a Domain Controller (DC), and a Member Server (Client) with zero manual intervention.
+## 🗺️ What You Are Building
 
-⚠️ **Estimated Cost:** ~$0.50-1.00/hour (~$12-24/day) when running t3.medium instances
+You are deploying a professional Identity Lab directly from your browser.
 
-The lab demonstrates **Infrastructure as Code (IaC)** principles and **Zero Trust** security by using AWS Systems Manager (SSM) instead of open RDP ports.
+```text
+       (You)
+         |
+    [ AWS CloudShell ]  <--- (Free Browser Terminal)
+         |
+         | (Deploys via Terraform)
+         v
+  +-----------------------------------------+
+  |      PRIVATE LAB NETWORK (VPC)          |
+  |                                         |
+  |   +-------------+     +--------------+  |
+  |   | Domain      |<--->| Member       |  |
+  |   | Controller  |     | Server       |  |
+  |   | (DC01)      |     | (Client01)   |  |
+  |   +-------------+     +--------------+  |
+  +-----------------------------------------+
 
-## 📋 Table of Contents
+```
 
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Phase 0: Identity Bootstrap](#2-phase-0-identity-bootstrap-run-once)
-  - [Phase 1: Deploy Infrastructure](#3-phase-1-deploy-infrastructure)
-  - [Access the Lab](#4-access-the-lab)
-- [Technical Details](#-technical-details)
-- [Clean Up](#-clean-up)
+* **Zero Setup:** No local tools to install. No configuration files.
+* **Secure:** Uses AWS Systems Manager (SSM) for access. No public IP addresses required.
 
-## 🏗 Architecture
+---
 
-The environment creates an isolated network topology:
+## 🚀 Step-by-Step Guide
 
-| Component | Details |
-|-----------|---------|
-| **VPC** | `10.10.0.0/16` (Custom non-default VPC) |
-| **Domain Controller (DC01)** | `10.10.1.10` (Windows Server 2022 Core) |
-| **Member Server (Client01)** | `10.10.2.20` (Windows Server 2022 Core) |
-| **Domain** | `corp.cloudlab.internal` |
-| **Security** | "Dark Node" configuration (No inbound internet access) |
+### Phase 1: Launch the Lab
 
-## 🚀 Getting Started
+#### Time: ~15 Minutes
 
-### Prerequisites
+1. **Log in to AWS:**
 
-Before you begin, ensure you have the following installed and configured:
+* Go to the [AWS Console](https://console.aws.amazon.com/).
+* Ensure you are in **US East (N. Virginia)** or your preferred region.
 
-- [ ] **Terraform** (v1.0 or higher) - [Download](https://www.terraform.io/downloads)
-- [ ] **AWS CLI** - Configured with `aws configure` - [Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-- [ ] **AWS Session Manager Plugin** - [Install Guide](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
-- [ ] **AWS Account** with appropriate permissions (see Phase 0)
+1. **Open CloudShell:**
 
-### 1. Clone the Repository
+* Click the **CloudShell icon** (`>_`) in the top navigation bar (near the bell icon).
+* *Or press `Alt` + `S` (Windows) / `Option` + `S` (Mac).*
+* Wait for the terminal to prepare.
+
+1. **Run the Deployment:**
+
+* Paste the following commands into the terminal and hit Enter:
 
 ```bash
 git clone https://github.com/Hectormalvarez/basic-ad.git
 cd basic-ad
+./quickstart.sh
+
 ```
 
+1. **Enter a Password:**
 
-### 2. Phase 0: Identity Bootstrap
+* When prompted, type a secure password (e.g., `SuperSecurePass123!`).
+* *Note: Characters will not appear while typing.*
 
-Before deploying the lab, you need a secure identity. Choose the method that fits your environment:
+1. **Wait for Completion:**
 
-| Method | Description | Link |
-| :--- | :--- | :--- |
-| **A. Local CLI** | For users who already have local AWS keys. Creates a secure IAM Group. | [View Instructions](environments/00-bootstrap-iam/README.md) |
-| **B. Cloud Runner** | **(Recommended)** Launches a secure jump box via CloudFormation. No local keys required. | [View Instructions](environments/00-bootstrap-runner/README.md) |
+* Terraform will build the network and servers.
+* The lab takes about **10-15 minutes** (Windows needs to reboot twice to promote the Domain Controller).
+* Look for the green message: `Deployment Complete!`
 
-### 3. Phase 1: Deploy Infrastructure
+### Phase 2: Access the Domain Controller
 
-Navigate to the main lab environment:
+Once the deployment finishes, you can connect directly from CloudShell.
+
+1. **Connect to DC01:**
+
+* Run this command in your CloudShell terminal:
 
 ```bash
-cd ../aws-phase1
+./connect.sh
+
 ```
 
-Create a `terraform.tfvars` file to configure your secrets:
+* *This uses AWS Systems Manager to open a secure PowerShell session on the Domain Controller.*
 
-⚠️ **Password Warning:** Windows Server enforces strict complexity (Uppercase, Lowercase, Numbers).
+1. **Verify Active Directory:**
 
-```hcl
-# environments/aws-phase1/terraform.tfvars
+* Once connected (you will see a `PS C:\>` prompt), try these commands:
 
-# The master password for the lab (Must be Complex!)
-admin_password = "CloudL@b2026!"
+```powershell
+# Check the domain details
+Get-ADDomain
 
-# Optional: Change the instance size
-instance_type = "t3.medium"
+# Check DNS records
+Get-DnsServerResourceRecord -ZoneName "corp.cloudlab.internal"
+
 ```
 
-Initialize and deploy:
+### Phase 3: Access the Client (Optional)
+
+1. Open a **new** CloudShell tab (Click the `+` icon).
+2. Navigate to the folder: `cd basic-ad`
+3. Connect to the member server:
 
 ```bash
-terraform init
-terraform apply
+./connect.sh client
+
 ```
-
-#### Deployment Timeline
-
-The deployment takes approximately **15-20 minutes**:
-
-- **Step 1 (2 min):** Infrastructure provisioning
-- **Step 2 (10-15 min):** Windows bootstrapping (DC Promotion & Reboot)
-
-### 4. Access the Lab
-
-This lab uses **AWS Systems Manager** for secure access. You do not need RDP or a Public IP.
-
-Run the commands output by Terraform to verify connectivity:
-
-**Connect to Domain Controller:**
-
-```bash
-# Copy the command from Terraform output 'ssm_dc_command'
-aws ssm start-session --target i-0123456789abcdef0
-```
-
-**Connect to Client:**
-
-```bash
-# Copy the command from Terraform output 'ssm_client_command'
-aws ssm start-session --target i-09876543210abcdef
-```
-
-Once inside the PowerShell session:
-
-- **Check Domain Status:** `Get-ADDomain`
-- **Check DNS:** `Get-DnsServerResourceRecord -ZoneName "corp.cloudlab.internal"`
 
 ---
 
-## 🔧 Technical Details
+## ❓ Troubleshooting
 
-### Zero Trust Access & Least Privilege
+### "CloudShell says 'command not found'"
 
-- **RBAC Identity:** The `00-bootstrap-iam` module creates a custom IAM Group (`terraform-group`) with restricted permissions, ensuring the lab operator cannot accidentally modify billing or root settings.
-- **No Open Ports:** Security Groups allow NO inbound traffic from the internet.
-- **IAM Auth:** Access is controlled via AWS Identity and Access Management (IAM), not network firewalls.
-- **DNS Handling:** Custom bootstrapping scripts inject DNS Forwarders to ensure the DC can communicate with AWS APIs even after promoting to a Domain Controller.
+Ensure you are in the correct directory. Run `cd ~/basic-ad` and try again.
 
-## 🧹 Clean Up
+### "Connection failed / Target not connected"
 
-To destroy the lab infrastructure:
+If you try `./connect.sh` immediately after deployment, the server might still be booting. Wait 2 minutes and try again.
+
+### "Terraform Error: 403 Forbidden / Access Denied"
+
+Your AWS user permissions might be too restricted. Ensure you are using an Admin user or have full EC2/VPC permissions.
+
+---
+
+## 🧹 Cleanup (Crucial!)
+
+**Do not skip this.** If you leave this running, AWS will charge you for the servers.
+
+1. Go back to your **CloudShell** terminal.
+2. Run this command:
 
 ```bash
-# From environments/aws-phase1/
-terraform destroy
+cd ~/basic-ad/lab
+terraform destroy -auto-approve
+
 ```
+
+1. Wait for the confirmation: `Destroy complete!`
+
+> **Tip:** If you close CloudShell, your lab is **NOT** deleted. You must reopen CloudShell, navigate to the folder, and run the destroy command.
