@@ -1,11 +1,16 @@
 #!/bin/bash
-# quickstart.sh - The "Easy Button" (Free Tier Edition)
+# quickstart.sh - The "Easy Button" (Flexible Instance Type)
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# 1. Set Instance Type (Default: t3.micro)
+#    Usage: ./quickstart.sh [instance_type]
+INSTANCE_TYPE=${1:-t3.micro}
+
 echo -e "${CYAN}=== Basic AD Lab Setup ===${NC}"
+echo -e "Target Instance Type: ${GREEN}$INSTANCE_TYPE${NC}"
 
 # Check if we are in the right folder
 if [ ! -d "lab" ]; then
@@ -14,7 +19,7 @@ if [ ! -d "lab" ]; then
 fi
 
 # ------------------------------------------------------------------
-# 0. Auto-Install Terraform (If missing in CloudShell)
+# 2. Auto-Install Terraform (If missing in CloudShell)
 # ------------------------------------------------------------------
 if ! command -v terraform &> /dev/null; then
     echo -e "${CYAN}Terraform not found. Installing...${NC}"
@@ -25,7 +30,7 @@ if ! command -v terraform &> /dev/null; then
     echo -e "${GREEN}Terraform installed successfully!${NC}"
 fi
 
-# 1. Ask for Password
+# 3. Ask for Password
 echo ""
 echo -e "Enter a ${GREEN}Domain Admin Password${NC}."
 echo "(Must contain Uppercase, Lowercase, Numbers, Special Char)"
@@ -33,14 +38,14 @@ echo -n "Password: "
 read -s LAB_PASSWORD
 echo ""
 
-# 2. Write Config (FIXED: Uses t3.micro for Free Tier)
+# 4. Write Config
 echo -e "\nConfiguring secrets..."
 cat <<EOF > lab/terraform.tfvars
 admin_password = "$LAB_PASSWORD"
-instance_type  = "t3.micro"
+instance_type  = "$INSTANCE_TYPE"
 EOF
 
-# 3. Deploy
+# 5. Deploy
 echo -e "Initializing..."
 cd lab
 terraform init -input=false
