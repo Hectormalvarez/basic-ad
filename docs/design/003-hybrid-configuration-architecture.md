@@ -44,7 +44,7 @@ We are moving from a strict "Zero Trust" (SSM Only) model to a "Privileged Acces
 *Mark completed steps with [x].*
 
 ### Phase 1: Infrastructure Hardware
-- [ ] **Commit 1:** `feat: add linux controller and instance variables`
+- [x] **Commit 1:** `feat: add linux controller and instance variables`
     * Split `instance_type` into `linux_instance_type` / `windows_instance_type`.
     * Define `aws_instance.edge_gateway` (Amazon Linux 2023) in Terraform.
 - [ ] **Commit 2:** `feat: enable winrm connectivity`

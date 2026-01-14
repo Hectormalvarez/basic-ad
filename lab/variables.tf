@@ -26,10 +26,16 @@ variable "az" {
   default     = "us-east-1a"
 }
 
-variable "instance_type" {
-  description = "EC2 instance size for Lab Servers"
+variable "windows_instance_type" {
+  description = "EC2 instance size for Windows Nodes (DC/Client)"
   type        = string
   default     = "t3.small"
+}
+
+variable "linux_instance_type" {
+  description = "EC2 instance size for the Linux Controller"
+  type        = string
+  default     = "t3.nano"
 }
 
 variable "admin_password" {

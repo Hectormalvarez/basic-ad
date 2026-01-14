@@ -19,7 +19,7 @@ if [[ "$1" == "destroy" ]]; then
         exit 1
     fi
 
-    echo "⚠️  This will delete all Lab resources (VPC, DC01, Client01)."
+    echo "⚠️  This will delete all Lab resources (VPC, DC01, Client01, Controller)."
     read -p "Are you sure? (y/N): " -n 1 -r
     echo ""
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -36,12 +36,14 @@ fi
 
 # ------------------------------------------------------------------
 # 2. DEPLOY MODE
-#    Usage: ./quickstart.sh [instance_type]
+#    Usage: ./quickstart.sh [windows_instance_type]
 # ------------------------------------------------------------------
+# Default for Windows nodes is t3.micro (Free Tier) unless overridden
 INSTANCE_TYPE=${1:-t3.micro}
 
 echo -e "${CYAN}=== Basic AD Lab Setup ===${NC}"
-echo -e "Target Instance Type: ${GREEN}$INSTANCE_TYPE${NC}"
+echo -e "Target Windows Instance Type: ${GREEN}$INSTANCE_TYPE${NC}"
+echo -e "Target Linux Instance Type:   ${GREEN}t3.nano${NC}"
 
 # Add helpful tip if using the slow default
 if [[ "$INSTANCE_TYPE" == "t3.micro" ]]; then
@@ -78,8 +80,9 @@ echo ""
 # 5. Write Config
 echo -e "\nConfiguring secrets..."
 cat <<EOF > lab/terraform.tfvars
-admin_password = "$LAB_PASSWORD"
-instance_type  = "$INSTANCE_TYPE"
+admin_password        = "$LAB_PASSWORD"
+windows_instance_type = "$INSTANCE_TYPE"
+linux_instance_type   = "t3.nano"
 EOF
 
 # 6. Deploy
