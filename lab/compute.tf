@@ -45,7 +45,7 @@ resource "aws_instance" "edge_gateway" {
   # Networking
   subnet_id                   = aws_subnet.gateway_subnet.id
   private_ip                  = "10.10.0.10"
-  vpc_security_group_ids      = [aws_security_group.base_sg.id]
+  vpc_security_group_ids      = [aws_security_group.edge_sg.id]
   associate_public_ip_address = true
 
   # Identity & Access Management (SSM Enabled)

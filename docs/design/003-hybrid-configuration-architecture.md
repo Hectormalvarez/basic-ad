@@ -47,10 +47,10 @@ We are moving from a strict "Zero Trust" (SSM Only) model to a "Privileged Acces
 - [x] **Commit 1:** `feat: add linux controller and instance variables`
     * Split `instance_type` into `linux_instance_type` / `windows_instance_type`.
     * Define `aws_instance.edge_gateway` (Amazon Linux 2023) in Terraform.
-- [ ] **Commit 2:** `feat: enable winrm connectivity`
+- [x] **Commit 2:** `feat: enable winrm connectivity`
     * Create `edge_sg`.
     * Allow TCP 5985 Inbound to `base_sg` from `edge_sg`.
-- [ ] **Commit 3:** `refactor: replace dc bootstrap with winrm listener`
+- [x] **Commit 3:** `refactor: replace dc bootstrap with winrm listener`
     * Replace heavy PowerShell bootstrap with minimal WinRM configuration script.
 
 ### Phase 2: Configuration Logic (Ansible)
