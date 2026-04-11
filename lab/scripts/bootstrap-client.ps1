@@ -1,64 +1,25 @@
 <#
 .SYNOPSIS
-    Orchestrates the convergence of a Member Server into the Active Directory domain.
+    Configures minimal WinRM listener for Ansible management.
+    Removes all self-contained domain join logic.
 #>
 
 param (
-    [string]$DomainName = "corp.cloudlab.internal",
-    [string]$AdminUser = "CloudAdmin", 
-    [string]$AdminPassword,
-    [string]$DcIP
+    [string]$DomainName = "corp.cloudlab.internal"
 )
 
-Start-Transcript -Path "C:\provisioning-client.log" -Append
+Start-Transcript -Path "C:\winrm-setup.log" -Append
 
 try {
-    # -------------------------------------------------------------------------
-    # 1. DNS Configuration
-    # -------------------------------------------------------------------------
-    $Interface = Get-NetAdapter | Where-Object Status -eq 'Up' | Select-Object -First 1
-    Set-DnsClientServerAddress -InterfaceIndex $Interface.InterfaceIndex -ServerAddresses $DcIP
+    # Minimal WinRM configuration for Ansible management
+    winrm quickconfig -q
+    winrm set winrm/config/service/auth '@{Basic="true"}'
+    winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 
-    # -------------------------------------------------------------------------
-    # 2. The Wait Loop (Connectivity Check)
-    # -------------------------------------------------------------------------
-    $MaxRetries = 60 
-    $RetryCount = 0
-    $DomainReady = $false
+    # Ensure firewall allows WinRM connections
+    Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
 
-    while (-not $DomainReady -and $RetryCount -lt $MaxRetries) {
-        # Check Port 389 (LDAP) to verify AD is listening
-        $Connection = Test-NetConnection -ComputerName $DcIP -Port 389 -WarningAction SilentlyContinue
-        
-        if ($Connection.TcpTestSucceeded) {
-            Write-Output "DC is reachable on Port 389 (LDAP)! Proceeding..."
-            $DomainReady = $true
-        }
-        else {
-            Write-Output "Waiting for DC Connectivity (Port 389)... ($RetryCount / $MaxRetries)"
-            Start-Sleep -Seconds 15
-            $RetryCount++
-        }
-    }
-
-    # -------------------------------------------------------------------------
-    # 3. Join Domain
-    # -------------------------------------------------------------------------
-    if ($DomainReady) {
-        Start-Sleep -Seconds 10 
-        
-        $pwd = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-        
-        # Construct the UPN for CloudAdmin (e.g., CloudAdmin@corp.cloudlab.internal)
-        $UPN = "$AdminUser@$DomainName"
-        $cred = New-Object System.Management.Automation.PSCredential($UPN, $pwd)
-
-        Write-Output "Joining domain $DomainName as $UPN..."
-        
-        Add-Computer -DomainName $DomainName -Credential $cred -Restart -Force
-    } else {
-        Throw "Timed out waiting for DC ($DcIP)."
-    }
+    Write-Output "WinRM listener configured successfully."
 }
 catch {
     Write-Error $_
