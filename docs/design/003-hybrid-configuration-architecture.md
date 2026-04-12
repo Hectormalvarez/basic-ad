@@ -63,5 +63,5 @@ We are moving from a strict "Zero Trust" (SSM Only) model to a "Privileged Acces
 - [x] **Commit 6:** `feat: add provisioning wrapper script`
     * Update Linux `user_data` to install Ansible/Git.
     * Create `provision.sh` helper script.
-- [ ] **Commit 7:** `docs: update workflow for ansible integration`
+- [x] **Commit 7:** `docs: update workflow for ansible integration`
     * Update README to reflect the new Deploy -> Connect -> Provision workflow.

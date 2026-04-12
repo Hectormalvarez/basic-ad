@@ -57,10 +57,8 @@ iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
 user_data = <<-EOF
             #!/bin/bash
             dnf update -y
-            dnf install -y git ansible python3-pip
+            dnf install -y git ansible-core python3-pip
             pip3 install pywinrm
-
-            # Clone the repository so the playbooks are ready for the admin
             sudo -u ec2-user git clone https://github.com/Hectormalvarez/basic-ad.git /home/ec2-user/basic-ad
             EOF
 

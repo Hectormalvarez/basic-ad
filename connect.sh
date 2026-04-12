@@ -9,6 +9,9 @@ TARGET=${1:-dc}
 if [[ "$TARGET" == "client" ]]; then
     SERVER_TAG="Client01-Member"
     DISPLAY_NAME="Member Server (Client01)"
+elif [[ "$TARGET" == "controller" ]]; then
+    SERVER_TAG="Edge-Gateway"
+    DISPLAY_NAME="Linux Controller"
 else
     SERVER_TAG="DC01-Identity"
     DISPLAY_NAME="Domain Controller (DC01)"

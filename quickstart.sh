@@ -91,5 +91,7 @@ cd lab
 terraform init -input=false
 terraform apply -auto-approve
 
-echo -e "\n${GREEN}Deployment initiated!${NC}"
-echo "Wait ~15 mins for AD promotion. Then run ./connect.sh"
+echo -e "\n${GREEN}Infrastructure Deployment Complete!${NC}"
+echo -e "Next Steps:"
+echo -e "1. Wait 3 mins, then: ${GREEN}./connect.sh controller${NC}"
+echo -e "2. Run: ${GREEN}./provision.sh${NC}"
