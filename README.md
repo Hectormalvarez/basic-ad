@@ -15,11 +15,17 @@ You are deploying a professional Identity Lab directly from your browser.
          |
     [ AWS CloudShell ]  <--- (Free Browser Terminal)
          |
-         | (Deploys via Terraform)
+         | (Deploys "Hardware" via Terraform)
          v
   +-----------------------------------------+
   |      PRIVATE LAB NETWORK (VPC)          |
   |                                         |
+  |   +-----------------+                   |
+  |   | Linux Controller|                   |
+  |   | 10.10.0.10      |                   |
+  |   +-----------------+                   |
+  |          |   ^                          |
+  |          v   |                          |
   |   +-------------+     +--------------+  |
   |   | Domain      |<--->| Member       |  |
   |   | Controller  |     | Server       |  |
@@ -38,7 +44,9 @@ You are deploying a professional Identity Lab directly from your browser.
 
 ### Phase 1: Launch the Lab
 
-#### Time: ~15 Minutes
+> This phase only provisions the "Hardware" infrastructure. Configuration happens after you connect to the controller.
+
+#### Time: ~7 Minutes
 
 1. **Log in to AWS:**
 
@@ -81,9 +89,27 @@ To use a faster instance, run: `./quickstart.sh LARGER_INSTANCE_TYPE`
 * The lab takes about **10-15 minutes** (Windows needs to reboot twice to promote the Domain Controller).
 * Look for the green message: `Deployment Complete!`
 
-### Phase 2: Access the Domain Controller
+### Phase 2: Configure Active Directory
 
-Once the deployment finishes, you can connect directly from CloudShell.
+1. **Connect to the Linux Controller**
+
+From CloudShell, run:
+```bash
+./connect.sh controller
+```
+
+2. **Run the Ansible Provisioning**
+
+Inside the controller terminal, run:
+```bash
+./provision.sh
+```
+
+This will execute the Ansible playbook to promote the Domain Controller and configure the lab environment.
+
+### Phase 3: Access the Domain Controller
+
+Once provisioning finishes, you can connect directly from CloudShell.
 
 1. **Connect to DC01:**
 
@@ -109,7 +135,7 @@ Get-DnsServerResourceRecord -ZoneName "corp.cloudlab.internal"
 
 ```
 
-### Phase 3: Access the Client (Optional)
+### Phase 4: Access the Client (Optional)
 
 1. Open a **new** CloudShell tab (Click the `+` icon).
 2. Navigate to the folder: `cd basic-ad`
@@ -140,7 +166,7 @@ Your AWS user permissions might be too restricted. Ensure you are using an Admin
 
 ## 🧹 Cleanup (Crucial!)
 
-**Do not skip this.** If you leave this running, AWS will charge you for the servers.
+**Do not skip this.** If you leave this running, AWS will charge you for the Linux Controller, Domain Controller, and Member Server.
 
 1. Go back to your **CloudShell** terminal.
 2. Run this command:
@@ -152,4 +178,4 @@ Your AWS user permissions might be too restricted. Ensure you are using an Admin
 
 1. Wait for the confirmation: `Cleanup Complete!`
 
-> **Tip:** If you close CloudShell, your lab is **NOT** deleted. You must reopen CloudShell, navigate to the folder, and run the destroy command.
+> **Tip:** If you close CloudShell, your lab is **NOT** deleted. You must reopen CloudShell, navigate to the folder, and run the destroy command. All lab resources including the Controller will be removed.
