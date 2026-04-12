@@ -1,0 +1,38 @@
+---
+- name: Promote Windows Server to Domain Controller
+  hosts: domain_controllers
+  gather_facts: yes
+  vars:
+    domain_name: "corp.cloudlab.internal"
+
+  tasks:
+    - name: Ensure the ComputerName is DC01
+      ansible.windows.win_hostname:
+        name: DC01
+      register: hostname_change
+
+    - name: Reboot after rename if required
+      ansible.windows.win_reboot:
+      when: hostname_change.reboot_required
+
+    - name: Install Active Directory Domain Services
+      ansible.windows.win_feature:
+        name: AD-Domain-Services
+        state: present
+        include_management_tools: yes
+
+    - name: Promote to Domain Controller
+      ansible.windows.win_domain:
+        dns_domain_name: "{{ domain_name }}"
+        safe_mode_password: "{{ ansible_password }}"
+      register: domain_promotion
+
+    - name: Reboot after promotion
+      ansible.windows.win_reboot:
+      when: domain_promotion.reboot_required
+
+    - name: Configure DNS Forwarder to VPC Resolver
+      ansible.windows.win_shell: |
+        Add-DnsServerForwarder -IPAddress "10.10.0.2" -PassThru
+      register: dns_forwarder
+      changed_when: "'10.10.0.2' in dns_forwarder.stdout"

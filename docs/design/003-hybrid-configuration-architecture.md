@@ -54,9 +54,9 @@ We are moving from a strict "Zero Trust" (SSM Only) model to a "Privileged Acces
     * Replace heavy PowerShell bootstrap with minimal WinRM configuration script.
 
 ### Phase 2: Configuration Logic (Ansible)
-- [ ] **Commit 4:** `feat: initialize ansible project structure`
+- [x] **Commit 4:** `feat: initialize ansible project structure`
     * Create `lab/ansible/` directory, `ansible.cfg`, and `inventory.ini`.
-- [ ] **Commit 5:** `feat: add domain controller promotion playbook`
+- [x] **Commit 5:** `feat: add domain controller promotion playbook`
     * Port `bootstrap-dc.ps1` logic to `setup-ad.yml` playbook.
 
 ### Phase 3: Integration & Documentation
