@@ -60,7 +60,7 @@ We are moving from a strict "Zero Trust" (SSM Only) model to a "Privileged Acces
     * Port `bootstrap-dc.ps1` logic to `setup-ad.yml` playbook.
 
 ### Phase 3: Integration & Documentation
-- [ ] **Commit 6:** `feat: add provisioning wrapper script`
+- [x] **Commit 6:** `feat: add provisioning wrapper script`
     * Update Linux `user_data` to install Ansible/Git.
     * Create `provision.sh` helper script.
 - [ ] **Commit 7:** `docs: update workflow for ansible integration`

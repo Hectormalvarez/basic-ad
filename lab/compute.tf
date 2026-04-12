@@ -49,9 +49,22 @@ resource "aws_instance" "edge_gateway" {
   associate_public_ip_address = true
 
   # Identity & Access Management (SSM Enabled)
-  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
+iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
 
-  tags = {
+# ---------------------------------------------------------------------------
+# Controller Bootstrap: Install Ansible and clone the repo
+# ---------------------------------------------------------------------------
+user_data = <<-EOF
+            #!/bin/bash
+            dnf update -y
+            dnf install -y git ansible python3-pip
+            pip3 install pywinrm
+
+            # Clone the repository so the playbooks are ready for the admin
+            sudo -u ec2-user git clone https://github.com/Hectormalvarez/basic-ad.git /home/ec2-user/basic-ad
+            EOF
+
+tags = {
     Name = "Edge-Gateway"
     Role = "Controller"
   }
