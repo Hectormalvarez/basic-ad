@@ -11,17 +11,7 @@ resource "aws_security_group" "edge_sg" {
   description = "Security Group for the Linux Controller (Ansible Node)"
   vpc_id      = aws_vpc.lab_vpc.id
 
-  # 1. INBOUND: Management Only
-  # Allow WinRM (TCP 5985) from the Linux Controller
-  ingress {
-    description     = "Allow WinRM (HTTP) from Linux Controller"
-    from_port       = 5985
-    to_port         = 5985
-    protocol        = "tcp"
-    security_groups = [aws_security_group.edge_sg.id]
-  }
-
-  # 2. OUTBOUND: Internet Access
+  # OUTBOUND: Internet Access
   # Required for Ansible to reach external resources
   egress {
     description = "Allow outbound traffic to the internet"
@@ -41,7 +31,7 @@ resource "aws_security_group" "base_sg" {
   description = "Base Security Group: WinRM from Controller + SSM Access Only"
   vpc_id      = aws_vpc.lab_vpc.id
 
-  # 1. INBOUND: Management Only
+  # INBOUND: Management Only
   # Allow WinRM (TCP 5985) from the Linux Controller
   ingress {
     description     = "Allow WinRM (HTTP) from Linux Controller"
@@ -51,7 +41,7 @@ resource "aws_security_group" "base_sg" {
     security_groups = [aws_security_group.edge_sg.id]
   }
 
-  # 2. OUTBOUND: Internet Access
+  # OUTBOUND: Internet Access
   # Required for SSM Agent to reach AWS API and for patching.
   egress {
     description = "Allow outbound traffic to the internet"
